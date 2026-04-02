@@ -71,15 +71,17 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 const HOST = "0.0.0.0";
 
-connectDB(process.env.MONGO_URI)
-  .then(() => {
-    console.log("✅ MongoDB connected");
+// Server start dulu, supaya tidak 503 total walaupun Mongo gagal
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
 
-    app.listen(PORT, HOST, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("❌ DB connect failed:", err?.message || err);
-    process.exit(1);
-  });
+// Koneksi database di belakang
+(async () => {
+  try {
+    await connectDB(process.env.MONGO_URI);
+    console.log("✅ MongoDB connected");
+  } catch (err) {
+    console.error("❌ MongoDB failed, server tetap jalan:", err?.message || err);
+  }
+})();
